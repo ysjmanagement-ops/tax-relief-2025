@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YA 2025 Personal Tax Relief Checker</title>
+<style>
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-mid: #5DCAA5;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --gray: #5F5E5A;
+    --gray-light: #F1EFE8;
+    --border: #e0ddd6;
+    --text: #1a1a18;
+    --text-muted: #6b6a65;
+    --text-hint: #9b9a94;
+    --bg: #f8f7f4;
+    --card: #ffffff;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .top-bar { background: var(--green-dark); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+  .top-bar svg { width: 22px; height: 22px; fill: #fff; flex-shrink: 0; }
+  .top-bar-title { font-size: 15px; font-weight: 600; }
+  .top-bar-sub { font-size: 12px; opacity: .75; }
+
+  .container { max-width: 680px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s ease; }
+  .progress-label { font-size: 12px; color: var(--text-hint); margin-top: 6px; text-align: right; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+  .badge-green { background: var(--green-light); color: var(--green-dark); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-gray { background: var(--gray-light); color: var(--gray); }
+
+  .question { font-size: 14px; color: var(--text); margin-bottom: 10px; line-height: 1.5; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .pill { border: 1.5px solid var(--border); border-radius: 20px; padding: 7px 16px; font-size: 13px; cursor: pointer; background: var(--card); color: var(--text); transition: all .15s; -webkit-tap-highlight-color: transparent; }
+  .pill:hover { border-color: var(--green); background: var(--green-light); }
+  .pill.yes { background: var(--green-light); border-color: var(--green); color: var(--green-dark); font-weight: 500; }
+  .pill.no { background: #fafaf8; border-color: var(--border); color: var(--text-muted); }
+  .pill.opt { background: var(--blue-light); border-color: var(--blue); color: var(--blue); font-weight: 500; }
+
+  .input-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+  .input-row label { font-size: 13px; color: var(--text-muted); flex: 1; min-width: 160px; }
+  .input-row input { width: 140px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 13px; color: var(--text); background: var(--bg); }
+  .input-row input:focus { outline: none; border-color: var(--green); background: #fff; }
+  .cap-tag { font-size: 11px; background: var(--blue-light); color: var(--blue); padding: 2px 8px; border-radius: 20px; }
+
+  .note-box { font-size: 12px; color: var(--text-muted); background: var(--gray-light); border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 8px; line-height: 1.6; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+  .relief-unlocked { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--green-dark); margin-bottom: 10px; }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; flex-wrap: wrap; }
+  .btn { padding: 10px 22px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+  .btn-primary { background: var(--green); color: #fff; }
+  .btn-primary:hover { background: var(--green-dark); }
+  .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-wa { background: #25D366; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .btn-wa:hover { background: #1da851; }
+  .btn-restart { background: var(--card); color: var(--text-muted); border: 1px solid var(--border); }
+  .step-count { font-size: 12px; color: var(--text-hint); align-self: center; flex: 1; }
+
+  /* Summary */
+  .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; font-size: 13px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-label { color: var(--text-muted); flex: 1; line-height: 1.5; }
+  .summary-amt { font-weight: 600; color: var(--text); white-space: nowrap; }
+  .total-bar { background: var(--green-light); border-radius: var(--radius-sm); padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .total-label { font-size: 14px; font-weight: 600; color: var(--green-dark); }
+  .total-amt { font-size: 22px; font-weight: 700; color: var(--green-dark); }
+
+  .client-name-wrap { margin-bottom: 20px; }
+  .client-name-wrap label { font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .client-name-wrap input { width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; color: var(--text); background: var(--card); }
+  .client-name-wrap input:focus { outline: none; border-color: var(--green); }
+
+  .summary-header { text-align: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .summary-header h2 { font-size: 17px; font-weight: 600; }
+  .summary-header p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .disclaimer { font-size: 11px; color: var(--text-hint); margin-top: 12px; line-height: 1.6; text-align: center; }
+
+  .hidden { display: none !important; }
+
+  @media print {
+    .btn-row, .top-bar, .progress-wrap { display: none !important; }
+    body { background: #fff; }
+    .card { border: 1px solid #ccc; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
+  <div>
+    <div class="top-bar-title">YA 2025 Personal Tax Relief Checker</div>
+    <div class="top-bar-sub">Form B — Resident Individual</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+    <div class="progress-label" id="plabel">Step 1 of 14</div>
+  </div>
+
+  <div id="wizard"></div>
+
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    id:'name', label:'Your details', icon:'👤', badge:null,
+    questions:[{id:'q_name',text:'What is your name? (so your tax agent can identify your form)',type:'text',placeholder:'e.g. Ahmad bin Ali'}],
+    reliefs:[]
+  },
+  {
+    id:'auto', label:'Individual relief', icon:'🛡️', badge:{text:'Auto RM9,000',cls:'badge-green'},
+    questions:[], reliefs:[{code:'H1',label:'Individual & dependent relatives (H1)',fixed:9000,note:'Automatically granted to every resident individual — no action needed.'}]
+  },
+  {
+    id:'parents', label:'Parents & grandparents', icon:'👨‍👩‍👧', badge:{text:'Up to RM8,000',cls:'badge-blue'},
+    questions:[{id:'q_parents',text:'Did you pay for medical treatment, dental treatment, special needs or carer expenses for your parents or grandparents who are resident in Malaysia?',opts:['Yes','No']}],
+    reliefs:[{code:'H2',label:'Medical/dental/carer expenses — parents or grandparents (H2)',cap:8000,subNote:'Complete medical exam (incl. vaccination) sub-limit: RM1,000',input:true}],
+    showIf:{q:'q_parents',val:'Yes'}
+  },
+  {
+    id:'disabled', label:'Disabled individuals', icon:'♿', badge:{text:'H3 + H4 + H15',cls:'badge-gray'},
+    questions:[
+      {id:'q_self_disabled',text:'Are you a registered disabled person (certified by Dept. of Social Welfare)?',opts:['Yes','No']},
+      {id:'q_equip',text:'Did you purchase basic supporting equipment (wheelchair, hearing aid, artificial limb, dialysis machine etc.) for yourself, spouse, child or parent who is disabled?',opts:['Yes','No']},
+      {id:'q_spouse_disabled',text:'Is your spouse a registered disabled person?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H4',label:'Disabled individual — self (H4)',fixed:7000,showIf:{q:'q_self_disabled',val:'Yes'}},
+      {code:'H3',label:'Basic supporting equipment (H3)',cap:6000,input:true,showIf:{q:'q_equip',val:'Yes'}},
+      {code:'H15',label:'Disabled spouse (H15)',fixed:6000,showIf:{q:'q_spouse_disabled',val:'Yes'}}
+    ]
+  },
+  {
+    id:'edu', label:'Education fees (self)', icon:'🎓', badge:{text:'Up to RM7,000',cls:'badge-blue'},
+    questions:[{id:'q_edu',text:'Did you pay education fees for yourself at a Malaysian recognised institution or professional body?',opts:['Yes','No']}],
+    reliefs:[{code:'H5',label:'Education fees — self (H5)',cap:7000,subNote:'Upskilling/self-enhancement (non-accredited) sub-limit: RM2,000',input:true}],
+    showIf:{q:'q_edu',val:'Yes'}
+  },
+  {
+    id:'medical', label:'Medical expenses', icon:'🏥', badge:{text:'Up to RM10,000',cls:'badge-amber'},
+    questions:[
+      {id:'q_serious',text:'Did you pay for serious disease treatment (cancer, kidney failure, heart attack, leukemia etc.) for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_fertility',text:'Did you pay for fertility treatment (IUI, IVF etc.) for yourself or spouse?',opts:['Yes','No']},
+      {id:'q_vacc',text:'Did you pay for approved vaccinations (pneumococcal, HPV, influenza, COVID-19 etc.) for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_dental',text:'Did you pay for dental examination or treatment for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_checkup',text:'Did you pay for a complete medical check-up or disease screening test (blood test, ultrasound, mammogram, pap smear, COVID-19 test etc.)?',opts:['Yes','No']},
+      {id:'q_device',text:'Did you purchase a self-testing medical device (blood pressure monitor, pulse oximeter, thermometer, COVID self-test kit etc.) for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_mental',text:'Did you pay for mental health consultation (psychiatrist, clinical psychologist or registered counsellor) for yourself, spouse or child?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H6i',label:'Serious disease treatment (H6i)',cap:10000,input:true,pool:'med10k',showIf:{q:'q_serious',val:'Yes'}},
+      {code:'H6ii',label:'Fertility treatment (H6ii)',cap:10000,input:true,pool:'med10k',showIf:{q:'q_fertility',val:'Yes'}},
+      {code:'H6iii',label:'Vaccination (H6iii) — sub-cap RM1,000',cap:1000,input:true,pool:'med10k',showIf:{q:'q_vacc',val:'Yes'}},
+      {code:'H6iv',label:'Dental treatment (H6iv) — sub-cap RM1,000',cap:1000,input:true,pool:'med10k',showIf:{q:'q_dental',val:'Yes'}},
+      {code:'H7i',label:'Medical check-up / disease screening (H7i)',cap:1000,input:true,pool:'h7',showIf:{q:'q_checkup',val:'Yes'}},
+      {code:'H7ii',label:'Self-testing medical device (H7ii)',cap:1000,input:true,pool:'h7',showIf:{q:'q_device',val:'Yes'}},
+      {code:'H7iii',label:'Mental health consultation (H7iii)',cap:1000,input:true,pool:'h7',showIf:{q:'q_mental',val:'Yes'}}
+    ],
+    note:'H6 + H7 combined maximum: RM10,000. H7(i)–(iii) combined sub-limit: RM1,000.'
+  },
+  {
+    id:'child_ld', label:'Child with learning disability', icon:'💙', badge:{text:'Up to RM6,000',cls:'badge-blue'},
+    questions:[{id:'q_child_ld',text:'Do you have a child aged 18 or below certified by a doctor as having a learning disability (autism, ADHD, Down Syndrome, GDD, Intellectual Disability etc.)?',opts:['Yes','No']}],
+    reliefs:[{code:'H8',label:'Assessment, early intervention & rehabilitation — learning disability (H8)',cap:6000,input:true}],
+    showIf:{q:'q_child_ld',val:'Yes'}
+  },
+  {
+    id:'lifestyle', label:'Lifestyle (H9)', icon:'📱', badge:{text:'Up to RM2,500',cls:'badge-blue'},
+    questions:[
+      {id:'q_books',text:'Did you buy books, journals, magazines or newspapers (hardcopy or digital, excluding banned materials)?',opts:['Yes','No']},
+      {id:'q_gadget',text:'Did you buy a personal computer, smartphone or tablet (not for business use) for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_internet',text:'Do you pay monthly internet subscription bills registered under your name?',opts:['Yes','No']},
+      {id:'q_upskill',text:'Did you pay for upskilling or self-enhancement courses (hobbies, languages, religion — not work-related, not already in H5)?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H9i',label:'Books/journals/magazines/newspapers (H9i)',cap:2500,input:true,pool:'h9',showIf:{q:'q_books',val:'Yes'}},
+      {code:'H9ii',label:'PC/smartphone/tablet (H9ii)',cap:2500,input:true,pool:'h9',showIf:{q:'q_gadget',val:'Yes'}},
+      {code:'H9iii',label:'Internet subscription (H9iii)',cap:2500,input:true,pool:'h9',showIf:{q:'q_internet',val:'Yes'}},
+      {code:'H9iv',label:'Upskilling/self-enhancement courses (H9iv)',cap:2500,input:true,pool:'h9',showIf:{q:'q_upskill',val:'Yes'}}
+    ],
+    note:'H9 total capped at RM2,500 across all items.'
+  },
+  {
+    id:'sports', label:'Lifestyle — sports (H10)', icon:'🏃', badge:{text:'Up to RM1,000',cls:'badge-green'},
+    questions:[
+      {id:'q_sports_equip',text:'Did you buy sports equipment for any sport under the Sports Development Act 1997 (excluding motorised two-wheel bicycles) for yourself, spouse, child or parent?',opts:['Yes','No']},
+      {id:'q_sports_fac',text:'Did you pay rental or entrance fees to any sports facility for yourself, spouse, child or parent?',opts:['Yes','No']},
+      {id:'q_sports_comp',text:'Did you pay registration fees for any sports competition with an organiser approved by the Commissioner of Sports?',opts:['Yes','No']},
+      {id:'q_gym',text:'Did you pay gym membership or sports training fees at a registered sports club or company carrying out sports under the Sports Development Act 1997?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H10i',label:'Sports equipment — Sports Dev. Act 1997 (H10i)',cap:1000,input:true,pool:'h10',showIf:{q:'q_sports_equip',val:'Yes'}},
+      {code:'H10ii',label:'Sports facility rental/entrance fee (H10ii)',cap:1000,input:true,pool:'h10',showIf:{q:'q_sports_fac',val:'Yes'}},
+      {code:'H10iii',label:'Sports competition registration (H10iii)',cap:1000,input:true,pool:'h10',showIf:{q:'q_sports_comp',val:'Yes'}},
+      {code:'H10iv',label:'Gym/sports training membership (H10iv)',cap:1000,input:true,pool:'h10',showIf:{q:'q_gym',val:'Yes'}}
+    ],
+    note:'H10 total capped at RM1,000 across all items.'
+  },
+  {
+    id:'breastfeeding', label:'Breastfeeding equipment', icon:'🍼', badge:{text:'Up to RM1,000',cls:'badge-blue'},
+    questions:[
+      {id:'q_bf_female',text:'Are you a female taxpayer who is breastfeeding a child aged 2 or below?',opts:['Yes','No']},
+      {id:'q_bf',text:'Did you purchase breastfeeding equipment (breast pump kit, ice pack, storage equipment, cooler bag)?',opts:['Yes','No']}
+    ],
+    reliefs:[{code:'H11',label:'Breastfeeding equipment (H11) — once per 2 YAs',cap:1000,input:true}],
+    showIf:[{q:'q_bf_female',val:'Yes'},{q:'q_bf',val:'Yes'}]
+  },
+  {
+    id:'childcare', label:'Child care / kindergarten', icon:'🏫', badge:{text:'Up to RM3,000',cls:'badge-blue'},
+    questions:[{id:'q_childcare',text:'Did you pay fees to a registered child care centre (DSW) or kindergarten (MOE) for a child aged 6 or below?',opts:['Yes','No']}],
+    reliefs:[{code:'H12',label:'Child care / kindergarten fees — child ≤ 6 years (H12)',cap:3000,input:true}],
+    showIf:{q:'q_childcare',val:'Yes'}
+  },
+  {
+    id:'sspn', label:'SSPN savings', icon:'🏦', badge:{text:'Up to RM8,000',cls:'badge-green'},
+    questions:[{id:'q_sspn',text:'Did you save money in Skim Simpanan Pendidikan Nasional (SSPN) for your child\'s education in 2025?',opts:['Yes','No']}],
+    reliefs:[{code:'H13',label:'Net SSPN deposit (H13) — YA 2025–2027',cap:8000,input:true,note:'Net = total saved minus any withdrawals made during 2025.'}],
+    showIf:{q:'q_sspn',val:'Yes'}
+  },
+  {
+    id:'spouse_child', label:'Spouse & children', icon:'👨‍👩‍👦', badge:{text:'H14 + H16',cls:'badge-gray'},
+    questions:[
+      {id:'q_spouse',text:'Do you have a spouse with no income / no total income, OR your spouse elected joint assessment in your name?',opts:['Yes','No']},
+      {id:'q_child_u18',text:'Do you have an unmarried child below 18 years old?',opts:['Yes','No']},
+      {id:'q_child_study',text:'Do you have an unmarried child aged 18+ currently in full-time study?',opts:['Yes','No']},
+      {id:'q_child_degree',text:'Is that child studying at degree level or above (at a local university/college, or full-time degree abroad)?',opts:['Yes — degree/masters/doctorate','No — matriculation/pre-U/A-Level']},
+      {id:'q_disabled_child',text:'Do you have an unmarried disabled child?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H14',label:'Spouse relief (H14)',fixed:4000,showIf:{q:'q_spouse',val:'Yes'}},
+      {code:'H16a',label:'Child under 18 — RM2,000 each (H16a)',cap:99999,input:true,isCount:true,perUnit:2000,showIf:{q:'q_child_u18',val:'Yes'}},
+      {code:'H16b_low',label:'Child 18+ in study (non-degree) — RM2,000 each (H16b)',cap:99999,input:true,isCount:true,perUnit:2000,showIf:{q:'q_child_study',val:'Yes',and:{q:'q_child_degree',val:'No — matriculation/pre-U/A-Level'}}},
+      {code:'H16b_deg',label:'Child 18+ in degree/masters/doctorate — RM8,000 each (H16b)',cap:99999,input:true,isCount:true,perUnit:8000,showIf:{q:'q_child_study',val:'Yes',and:{q:'q_child_degree',val:'Yes — degree/masters/doctorate'}}},
+      {code:'H16c',label:'Disabled child — RM8,000 base (H16c)',fixed:8000,showIf:{q:'q_disabled_child',val:'Yes'}}
+    ]
+  },
+  {
+    id:'insurance', label:'Insurance & EPF', icon:'🔒', badge:{text:'Up to RM7,000 + more',cls:'badge-amber'},
+    questions:[
+      {id:'q_life',text:'Do you pay life insurance premiums or family takaful contributions for yourself or spouse?',opts:['Yes','No']},
+      {id:'q_epf',text:'Do you contribute to EPF (compulsory or voluntary)?',opts:['Yes','No']},
+      {id:'q_prs',text:'Do you contribute to a Private Retirement Scheme (PRS) or pay premiums for a deferred annuity?',opts:['Yes','No']},
+      {id:'q_edmed',text:'Do you pay premiums for education or medical insurance/takaful for yourself, spouse or child?',opts:['Yes','No']},
+      {id:'q_socso',text:'Do you contribute to SOCSO or EIS (Employment Insurance System)?',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H17a',label:'Life insurance / family takaful (H17) — sub-cap RM3,000',cap:3000,input:true,showIf:{q:'q_life',val:'Yes'}},
+      {code:'H17b',label:'EPF contribution (H17) — sub-cap RM4,000',cap:4000,input:true,showIf:{q:'q_epf',val:'Yes'}},
+      {code:'H18',label:'PRS / deferred annuity (H18) — YA 2025–2030',cap:3000,input:true,showIf:{q:'q_prs',val:'Yes'}},
+      {code:'H19',label:'Education & medical insurance (H19)',cap:4000,input:true,showIf:{q:'q_edmed',val:'Yes'}},
+      {code:'H20',label:'SOCSO / EIS contribution (H20)',cap:350,input:true,showIf:{q:'q_socso',val:'Yes'}}
+    ],
+    note:'H17 total (life insurance + EPF) capped at RM7,000 combined. Life/takaful sub-capped RM3,000, EPF sub-capped RM4,000.'
+  },
+  {
+    id:'ev', label:'EV charging & composting', icon:'⚡', badge:{text:'Up to RM2,500',cls:'badge-green'},
+    questions:[
+      {id:'q_ev',text:'Did you install, purchase, rent or subscribe to an EV (electric vehicle) charging facility for your own vehicle (not for business use)?',opts:['Yes','No']},
+      {id:'q_compost',text:'Did you purchase a food waste composting machine for household use? (This relief is allowed once every 3 YAs, for YA 2025–2027)',opts:['Yes','No']}
+    ],
+    reliefs:[
+      {code:'H21i',label:'EV charging facility (H21i) — YA 2024–2027',cap:2500,input:true,pool:'h21',showIf:{q:'q_ev',val:'Yes'}},
+      {code:'H21ii',label:'Food waste composting machine (H21ii) — once per 3 YAs',cap:2500,input:true,pool:'h21',showIf:{q:'q_compost',val:'Yes'}}
+    ],
+    note:'H21 total capped at RM2,500 across EV charging and composting machine combined.'
+  },
+  {
+    id:'firsthome', label:'First home interest', icon:'🏠', badge:{text:'RM5,000–RM7,000',cls:'badge-blue'},
+    questions:[
+      {id:'q_firsthome',text:'Did you purchase your FIRST residential property to live in, with Sale and Purchase Agreement signed between 1 Jan 2025 and 31 Dec 2027?',opts:['Yes','No']},
+      {id:'q_home_price',text:'What is the purchase price of the property?',opts:['RM500,000 or below','Above RM500,000 up to RM750,000']}
+    ],
+    reliefs:[
+      {code:'H22i',label:'Home loan interest — property ≤ RM500,000 (H22i)',cap:7000,input:true,showIf:{q:'q_firsthome',val:'Yes',and:{q:'q_home_price',val:'RM500,000 or below'}}},
+      {code:'H22ii',label:'Home loan interest — property RM500k–RM750k (H22ii)',cap:5000,input:true,showIf:{q:'q_firsthome',val:'Yes',and:{q:'q_home_price',val:'Above RM500,000 up to RM750,000'}}}
+    ],
+    note:'Claimable for 3 consecutive YAs from year interest first paid. Property must not generate rental income.'
+  }
+];
+
+let answers = {};
+let inputVals = {};
+let currentStep = 0;
+
+function checkIf(sf) {
+  if (!sf) return true;
+  if (Array.isArray(sf)) return sf.every(c => answers[c.q] === c.val);
+  if (answers[sf.q] !== sf.val) return false;
+  if (sf.and && answers[sf.and.q] !== sf.and.val) return false;
+  return true;
+}
+
+function updateProgress() {
+  const pct = Math.round((currentStep / (SECTIONS.length - 1)) * 100);
+  document.getElementById('pbar').style.width = pct + '%';
+  document.getElementById('plabel').textContent = 'Step ' + (currentStep + 1) + ' of ' + SECTIONS.length;
+}
+
+function render(idx) {
+  currentStep = idx;
+  updateProgress();
+  const s = SECTIONS[idx];
+  const w = document.getElementById('wizard');
+  w.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'card-header';
+  hdr.innerHTML = `<div class="card-icon">${s.icon}</div><div><div class="card-title">${s.label}${s.badge ? `<span class="badge ${s.badge.cls}">${s.badge.text}</span>` : ''}</div></div>`;
+  card.appendChild(hdr);
+
+  // Questions
+  s.questions.forEach(q => {
+    const qwrap = document.createElement('div');
+    qwrap.style.marginBottom = '14px';
+
+    if (q.type === 'text') {
+      qwrap.innerHTML = `<div class="question">${q.text}</div>`;
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = q.placeholder || '';
+      inp.value = answers[q.id] || '';
+      inp.style.cssText = 'width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--text);background:var(--card);margin-top:0';
+      inp.oninput = () => { answers[q.id] = inp.value; };
+      inp.onfocus = () => { inp.style.borderColor = 'var(--green)'; };
+      inp.onblur = () => { inp.style.borderColor = 'var(--border)'; };
+      qwrap.appendChild(inp);
+    } else {
+      qwrap.innerHTML = `<div class="question">${q.text}</div><div class="pills" id="pills_${q.id}"></div>`;
+      card.appendChild(qwrap);
+      const pills = card.querySelector(`#pills_${q.id}`);
+      q.opts.forEach(opt => {
+        const b = document.createElement('button');
+        const isYes = opt === 'Yes' || opt.startsWith('Yes');
+        const isNo = opt === 'No';
+        const isSel = answers[q.id] === opt;
+        b.className = 'pill' + (isSel ? (isYes ? ' yes' : isNo ? ' no' : ' opt') : '');
+        b.textContent = opt;
+        b.onclick = () => {
+          answers[q.id] = opt;
+          render(idx);
+        };
+        pills.appendChild(b);
+      });
+      return;
+    }
+    card.appendChild(qwrap);
+  });
+
+  // Reliefs
+  const visR = (s.reliefs || []).filter(r => checkIf(r.showIf));
+  if (visR.length > 0) {
+    const hr = document.createElement('hr');
+    hr.className = 'divider';
+    card.appendChild(hr);
+    const rl = document.createElement('div');
+    rl.className = 'relief-unlocked';
+    rl.textContent = '✓ Reliefs applicable';
+    card.appendChild(rl);
+
+    visR.forEach(r => {
+      const rw = document.createElement('div');
+      rw.style.marginBottom = '12px';
+      if (r.fixed) {
+        rw.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--text-muted)">${r.label}</span><span style="font-weight:600">RM ${r.fixed.toLocaleString()}</span></div>${r.note ? `<div class="note-box" style="margin-top:6px">${r.note}</div>` : ''}`;
+      } else if (r.input) {
+        const capTxt = r.isCount ? `RM ${(r.perUnit || 0).toLocaleString()} per child` : `Cap: RM ${(r.cap || 0).toLocaleString()}`;
+        rw.innerHTML = `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px">${r.label} <span class="cap-tag">${capTxt}</span></div>`;
+        const ir = document.createElement('div');
+        ir.className = 'input-row';
+        ir.innerHTML = `<label>${r.isCount ? 'Number of qualifying children' : 'Amount you paid (RM)'}</label>`;
+        const inp = document.createElement('input');
+        inp.type = 'number';
+        inp.min = '0';
+        inp.placeholder = r.isCount ? 'e.g. 2' : 'e.g. 1,200';
+        inp.value = inputVals[r.code] || '';
+        inp.oninput = () => { inputVals[r.code] = inp.value; };
+        ir.appendChild(inp);
+        rw.appendChild(ir);
+        if (r.subNote) rw.innerHTML += `<div class="note-box">${r.subNote}</div>`;
+        if (r.note) rw.innerHTML += `<div class="note-box" style="margin-top:6px">${r.note}</div>`;
+      }
+      card.appendChild(rw);
+    });
+  }
+
+  if (s.note) {
+    const nb = document.createElement('div');
+    nb.className = 'note-box';
+    nb.style.marginTop = '8px';
+    nb.textContent = '⚠ ' + s.note;
+    card.appendChild(nb);
+  }
+
+  w.appendChild(card);
+
+  // Nav
+  const nav = document.createElement('div');
+  nav.className = 'btn-row';
+  const sc = document.createElement('span');
+  sc.className = 'step-count';
+  sc.textContent = (idx + 1) + ' / ' + SECTIONS.length;
+  nav.appendChild(sc);
+
+  if (idx > 0) {
+    const back = document.createElement('button');
+    back.className = 'btn btn-secondary';
+    back.textContent = '← Back';
+    back.onclick = () => render(idx - 1);
+    nav.appendChild(back);
+  }
+
+  if (idx < SECTIONS.length - 1) {
+    const next = document.createElement('button');
+    next.className = 'btn btn-primary';
+    next.textContent = 'Next →';
+    next.onclick = () => render(idx + 1);
+    nav.appendChild(next);
+  } else {
+    const done = document.createElement('button');
+    done.className = 'btn btn-primary';
+    done.textContent = 'See my summary →';
+    done.onclick = () => renderSummary();
+    nav.appendChild(done);
+  }
+
+  w.appendChild(nav);
+  window.scrollTo(0, 0);
+}
+
+function calcTotal() {
+  let total = 9000;
+  let pools = {};
+  const poolCaps = { med10k: 10000, h7: 1000, h9: 2500, h10: 1000, h21: 2500 };
+
+  SECTIONS.forEach(s => {
+    if (s.id === 'auto' || s.id === 'name') return;
+    const sv = !s.showIf || checkIf(s.showIf);
+    if (!sv) return;
+    (s.reliefs || []).forEach(r => {
+      if (r.showIf && !checkIf(r.showIf)) return;
+      if (r.fixed) { total += r.fixed; return; }
+      const v = parseFloat(inputVals[r.code] || 0);
+      if (!v) return;
+      let amt = r.isCount ? Math.round(v) * (r.perUnit || 0) : v;
+      if (r.cap && r.cap < 99999) amt = Math.min(amt, r.cap);
+      if (r.pool) {
+        pools[r.pool] = (pools[r.pool] || 0) + amt;
+      } else {
+        total += amt;
+      }
+    });
+  });
+
+  Object.keys(pools).forEach(k => {
+    const cap = poolCaps[k];
+    total += cap ? Math.min(pools[k], cap) : pools[k];
+  });
+  return total;
+}
+
+function buildSummaryText() {
+  const name = answers['q_name'] || 'Client';
+  const total = calcTotal();
+  let lines = [`YA 2025 Tax Relief Summary — ${name}`, `Generated: ${new Date().toLocaleDateString('en-MY')}`, '', 'RELIEFS CLAIMED:', ''];
+  lines.push(`H1  Individual & dependent relatives       RM 9,000`);
+
+  let pools = {};
+  const poolCaps = { med10k: 10000, h7: 1000, h9: 2500, h10: 1000, h21: 2500 };
+
+  SECTIONS.forEach(s => {
+    if (s.id === 'auto' || s.id === 'name') return;
+    const sv = !s.showIf || checkIf(s.showIf);
+    if (!sv) return;
+    (s.reliefs || []).forEach(r => {
+      if (r.showIf && !checkIf(r.showIf)) return;
+      if (r.fixed) { lines.push(`${r.code.padEnd(6)} ${r.label.substring(0,42).padEnd(42)} RM ${r.fixed.toLocaleString()}`); return; }
+      const v = parseFloat(inputVals[r.code] || 0);
+      if (!v) return;
+      let amt = r.isCount ? Math.round(v) * (r.perUnit || 0) : v;
+      if (r.cap && r.cap < 99999) amt = Math.min(amt, r.cap);
+      if (r.pool) { pools[r.pool] = (pools[r.pool] || 0) + amt; }
+      lines.push(`${r.code.padEnd(6)} ${r.label.substring(0,42).padEnd(42)} RM ${amt.toLocaleString()}`);
+    });
+  });
+
+  let poolAdj = 0;
+  Object.keys(pools).forEach(k => {
+    const cap = poolCaps[k];
+    if (cap && pools[k] > cap) {
+      lines.push(`       ⚠ Pool cap applied (${k}): reduced to RM ${cap.toLocaleString()}`);
+      poolAdj += (pools[k] - cap);
+    }
+  });
+
+  lines.push('', `${'─'.repeat(55)}`, `ESTIMATED TOTAL RELIEF: RM ${total.toLocaleString()}`, '');
+  lines.push('Note: Please keep all receipts for 7 years. This is an estimate — verify with your tax agent before filing.');
+  return lines.join('\n');
+}
+
+function renderSummary() {
+  updateProgress();
+  document.getElementById('pbar').style.width = '100%';
+  document.getElementById('plabel').textContent = 'Summary';
+
+  const name = answers['q_name'] || '';
+  const total = calcTotal();
+  const w = document.getElementById('wizard');
+  w.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  card.innerHTML = `<div class="summary-header">
+    <div style="font-size:28px;margin-bottom:6px">📋</div>
+    <h2>YA 2025 Tax Relief Summary</h2>
+    <p>${name ? name + ' · ' : ''}Generated ${new Date().toLocaleDateString('en-MY')}</p>
+  </div>`;
+
+  let rows = [{ label: 'Individual & dependent relatives (H1)', amt: 9000 }];
+  let pools = {};
+  const poolCaps = { med10k: 10000, h7: 1000, h9: 2500, h10: 1000, h21: 2500 };
+  const poolLabels = { med10k: 'Medical pool cap RM10,000 applied', h7: 'H7 sub-cap RM1,000 applied', h9: 'Lifestyle cap RM2,500 applied', h10: 'Sports cap RM1,000 applied', h21: 'EV/compost cap RM2,500 applied' };
+
+  SECTIONS.forEach(s => {
+    if (s.id === 'auto' || s.id === 'name') return;
+    const sv = !s.showIf || checkIf(s.showIf);
+    if (!sv) return;
+    (s.reliefs || []).forEach(r => {
+      if (r.showIf && !checkIf(r.showIf)) return;
+      if (r.fixed) { rows.push({ label: r.label, amt: r.fixed }); return; }
+      const v = parseFloat(inputVals[r.code] || 0);
+      if (!v) return;
+      let amt = r.isCount ? Math.round(v) * (r.perUnit || 0) : v;
+      if (r.cap && r.cap < 99999) amt = Math.min(amt, r.cap);
+      if (r.pool) { pools[r.pool] = (pools[r.pool] || 0) + amt; }
+      rows.push({ label: r.label, amt: amt });
+    });
+  });
+
+  let capWarnings = [];
+  Object.keys(pools).forEach(k => {
+    const cap = poolCaps[k];
+    if (cap && pools[k] > cap) {
+      capWarnings.push(`⚠ ${poolLabels[k]} (your total: RM ${pools[k].toLocaleString()})`);
+    }
+  });
+
+  const table = document.createElement('div');
+  rows.forEach(r => {
+    table.innerHTML += `<div class="summary-row"><span class="summary-label">${r.label}</span><span class="summary-amt">RM ${r.amt.toLocaleString()}</span></div>`;
+  });
+  card.appendChild(table);
+
+  if (capWarnings.length > 0) {
+    const cw = document.createElement('div');
+    cw.className = 'note-box';
+    cw.style.marginTop = '10px';
+    cw.innerHTML = capWarnings.join('<br>');
+    card.appendChild(cw);
+  }
+
+  const tb = document.createElement('div');
+  tb.className = 'total-bar';
+  tb.innerHTML = `<span class="total-label">Estimated total relief</span><span class="total-amt">RM ${total.toLocaleString()}</span>`;
+  card.appendChild(tb);
+
+  card.innerHTML += `<div class="disclaimer">This is an estimate for reference. Keep all receipts & documents for 7 years.<br>Please verify with your tax agent before filing.</div>`;
+
+  w.appendChild(card);
+
+  // Action buttons
+  const nav = document.createElement('div');
+  nav.className = 'btn-row';
+  nav.style.flexWrap = 'wrap';
+  nav.style.justifyContent = 'center';
+  nav.style.gap = '10px';
+
+  const restart = document.createElement('button');
+  restart.className = 'btn btn-restart';
+  restart.textContent = '← Start over';
+  restart.onclick = () => { answers = {}; inputVals = {}; render(0); };
+  nav.appendChild(restart);
+
+  const copyBtn = document.createElement('button');
+  copyBtn.className = 'btn btn-secondary';
+  copyBtn.textContent = '📋 Copy summary';
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(buildSummaryText()).then(() => {
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => { copyBtn.textContent = '📋 Copy summary'; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = buildSummaryText();
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => { copyBtn.textContent = '📋 Copy summary'; }, 2000);
+    });
+  };
+  nav.appendChild(copyBtn);
+
+  const waBtn = document.createElement('button');
+  waBtn.className = 'btn btn-wa';
+  waBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.099.546 4.07 1.503 5.786L0 24l6.383-1.676A11.96 11.96 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.794 9.794 0 01-4.999-1.37l-.358-.214-3.724.977.994-3.63-.234-.372A9.781 9.781 0 012.182 12C2.182 6.58 6.58 2.182 12 2.182S21.818 6.58 21.818 12 17.42 21.818 12 21.818z"/></svg> Send via WhatsApp`;
+  waBtn.onclick = () => {
+    const text = encodeURIComponent(buildSummaryText());
+    window.open('https://wa.me/?text=' + text, '_blank');
+  };
+  nav.appendChild(waBtn);
+
+  w.appendChild(nav);
+  window.scrollTo(0, 0);
+}
+
+render(0);
+</script>
+</body>
+</html>
